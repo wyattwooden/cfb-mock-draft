@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!-- templates/base.html -->
+{% load static %}
+
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Mock Draft{% endblock %}</title>
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    </head>
+    <body>
+        <header>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'mock_now' %}">Mock Now</a></li>
+                    <li><a href="{% url 'draft_history' %}">Draft History</a></li>
+                </ul>
+            </nav>
+            <h1>My Fantasy Draft Site</h1>
+        </header>
+
+        <main>
+            {% block content %}
+            <!-- Default content if not overridden -->
+            {% endblock %}
+        </main>
+    </body>
+
+</html>
