@@ -1,10 +1,114 @@
 <!DOCTYPE html>
 <!-- templates/home.html -->
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h2>Welcome to your draft tool!</h2>
-    <p>This is the homepage.</p>
+<main>
+    <div class="layout">
+        <section class="site-info">
+            
+            <div class="welcome">
+                <h1>Welcome to [site name]!</h1>
+            </div>
+
+            <div class="intro">
+                <p>Here users are able to simulate a complete college football
+                    fantasy draft. Whether you're preparing for your own league,
+                    experimenting with draft strategies, or just want to explore
+                    how players might come off the board. This tool provides a
+                    flexible and interactive draft experience. It supports
+                    customizable draft settings, player position configurations,
+                    and intelligent auto-draft.
+                </p>
+                <p>Start now with no sign up needed!</p>
+            </div>
+
+            <div class="audience">
+                <p>This site is built for college football fans who love the
+                    strategy behind fantasy drafts. Whether you're a seasoned
+                    fantasy player or just exploring mock drafts for fun. It's 
+                    especially useful for users who enhoy the analytics side
+                    of fantasy in understanding positional value, lineup
+                    structure, and how small changes can affect an entire draft.
+                </p>
+            </div>
+
+            <div class="features">
+                <ul>
+                    <li><h3>Run full college football fantasy mock drafts</h3></li>
+                    <li><h3>Customize draft settings: league size, roster spots, draft position</h3></li>
+                    <li><h3>Randomize or select your draft position</h3></li>
+                    <li><h3>Save your drafts (sign up only) and revist them anytime</h3></li>
+                </ul>
+            </div>
+
+        </section>
+
+        <aside class="draft-preview">
+            <div class="draft-board" id="draftBoard">
+                <h2>Draft Board</h2>
+
+                <div class="draft-row header">
+                    <div>Hooked on Horns</div>
+                    <div>The Transfer Portalers</div>
+                    <div>NIL Deal Breakers</div>
+                    <div>Big Red Machine</div>
+                    <div>Bulldog Speed Demons</div>
+                    <div>Swamp Kings</div>
+                </div>
+
+                <div class="draft-row" id="pickRow">
+                    <div class="pick-cell">
+                        <div class="pick-background"></div> 
+                        <div class="pick-number"></div>
+                        <div class="player-name"></div>
+                        <div class="player-info"></div>
+                    </div>          
+                    <div class="pick-cell">
+                        <div class="pick-background"></div> 
+                        <div class="pick-number"></div>
+                        <div class="player-name"></div>
+                        <div class="player-info"></div>
+                    </div>
+                    
+                    <div class="pick-cell">
+                        <div class="pick-background"></div> 
+                        <div class="pick-number"></div>
+                        <div class="player-name"></div>
+                        <div class="player-info"></div>
+                    </div>
+                    
+                    <div class="pick-cell">
+                        <div class="pick-background"></div> 
+                        <div class="pick-number"></div>
+                        <div class="player-name"></div>
+                        <div class="player-info"></div>
+                    </div>
+                    
+                    <div class="pick-cell">
+                        <div class="pick-background"></div> 
+                        <div class="pick-number"></div>
+                        <div class="player-name"></div>
+                        <div class="player-info"></div>
+                    </div>
+                    
+                    <div class="pick-cell">
+                        <div class="pick-background"></div>
+                        <div class="pick-number"></div>
+                        <div class="player-name"></div>
+                        <div class="player-info"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div>Testing</div>
+
+</main>
+<!-- Include JS -->
+<script src="{% static 'js/home.js' %}"></script>
 {% endblock %}

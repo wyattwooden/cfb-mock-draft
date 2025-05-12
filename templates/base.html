@@ -8,10 +8,11 @@
         <meta charset="UTF-8">
         <title>{% block title %}Mock Draft{% endblock %}</title>
         <link rel="stylesheet" href="{% static 'css/base.css' %}">
+        <link rel="stylesheet" href="{% static 'css/home.css' %}">
     </head>
     <body>
         <header>
-            <nav>
+            <nav id ="nav_menu">
                 <ul>
                     <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="{% url 'mock_now' %}">Mock Now</a></li>
@@ -21,11 +22,11 @@
             <h1>My Fantasy Draft Site</h1>
         </header>
 
-        <main>
             {% block content %}
             <!-- Default content if not overridden -->
             {% endblock %}
-        </main>
     </body>
-
+    <footer>
+        
+    </footer>
 </html>
