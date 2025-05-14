@@ -10,21 +10,45 @@
         <link rel="stylesheet" href="{% static 'css/base.css' %}">
         <link rel="stylesheet" href="{% static 'css/home.css' %}">
     </head>
+
     <body>
+
         <header>
             <nav id ="nav_menu">
                 <ul>
                     <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="{% url 'mock_now' %}">Mock Now</a></li>
-                    <li><a href="{% url 'draft_history' %}">Draft History</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'draft_history' %}">Draft History</a></li>
+                    {% endif %}
                 </ul>
             </nav>
+
             <h1>My Fantasy Draft Site</h1>
+
+            {% if user.is_authenticated %}
+                <div class="account-dropdown">
+                    <button class="account-button">{{ user.username }}</button>
+                    <div class="account-menu">
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="logout-button">Logout</button>
+                            <li><a href="{% url 'password_reset' %}">Forgot Password?</a></li>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <li><a href="{% url 'login' %}">Log In</a></li>
+                <li><a href="{% url 'signup' %}">Sign Up</a></li>
+            {% endif %}
         </header>
 
-            {% block content %}
-            <!-- Default content if not overridden -->
-            {% endblock %}
+        {% block breadcrumbs %}
+        {% endblock %}
+
+        {% block content %}
+        {% endblock %}
+
     </body>
     <footer>
         

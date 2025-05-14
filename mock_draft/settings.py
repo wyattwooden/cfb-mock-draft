@@ -129,3 +129,11 @@ AUTH_USER_MODEL = "accounts.CustomUser" # tells django to use our custom user mo
 
 LOGIN_REDIRECT_URL= "home"
 LOGOUT_REDIRECT_URL= "home"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'wyattwooden5@gmail.com'
+EMAIL_HOST_PASSWORD = 'epwglbpgvkijlgaw'  
+DEFAULT_FROM_EMAIL = 'Mock Draft <wyattwooden5@gmail.com>'

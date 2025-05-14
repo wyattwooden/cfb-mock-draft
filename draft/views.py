@@ -1,11 +1,12 @@
-# draft/view.py
-from django.shortcuts import render
+# draft/views.py
+from django.views.generic import TemplateView
 
-def home(request):
-    return render(request, "home.html")
+class HomePageView(TemplateView):
+    template_name = "home.html"
 
-def mock_now(request):
-    return render(request, "mock_now.html")
+class MockNowView(TemplateView):
+    template_name = "mock_now.html"
 
-def draft_history(request):
-    return render(request, "draft_history.html")
+class DraftHistoryView(TemplateView):
+    template_name = "draft_history.html"
+
