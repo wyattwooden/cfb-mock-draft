@@ -17,7 +17,7 @@
             <nav id ="nav_menu">
                 <ul>
                     <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'mock_now' %}">Mock Now</a></li>
+                    <li><a href="{% url 'mock_settings' %}">Mock Now</a></li>
                     {% if user.is_authenticated %}
                         <li><a href="{% url 'draft_history' %}">Draft History</a></li>
                     {% endif %}
@@ -33,14 +33,18 @@
                         <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <button type="submit" class="logout-button">Logout</button>
-                            <li><a href="{% url 'password_reset' %}">Forgot Password?</a></li>
                         </form>
+                        <a href="{% url 'password_change' %}" class="logout-button">Password Change</a>
                     </div>
+
                 </div>
             {% else %}
-                <li><a href="{% url 'login' %}">Log In</a></li>
-                <li><a href="{% url 'signup' %}">Sign Up</a></li>
+                <div class="auth-links">
+                    <a href="{% url 'login' %}">Log In</a>
+                    <a href="{% url 'signup' %}">Sign Up</a>
+                </div>
             {% endif %}
+
         </header>
 
         {% block breadcrumbs %}

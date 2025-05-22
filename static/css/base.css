@@ -11,58 +11,154 @@ html, body {
     padding: 0;
 }
 
+/* --- HEADER --- */
 header {
-    width: 100%;
-    background-color: #1e293b; /* Slate-800 */
-    color: #f1f5f9; /* Slate-100 */
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
+  width: 100%;
+  background-color: #1e293b; /* Slate-800 */
+  color: #f1f5f9; /* Slate-100 */
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 
 /* Header title */
 header h1 {
-    font-size: 1.5rem;
-    margin: 0;
-    font-weight: 600;
-    color: #f8fafc; /* Slightly lighter text */
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+  color: #f8fafc; /* Slightly lighter for contrast */
 }
 
 /* Navigation menu */
 #nav_menu ul {
-    list-style: none;
-    display: flex;
-    gap: 1.5rem;
-    margin: 0;
-    padding: 0;
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
 }
 
-/* Links */
 #nav_menu a {
-    text-decoration: none;
-    color: #e2e8f0; /* Slate-200 */
-    font-weight: 500;
-    transition: color 0.2s ease;
+  text-decoration: none;
+  color: #e2e8f0; /* Slate-200 */
+  font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 #nav_menu a:hover {
-    color: #F8D974; /* Sky-400 */
+  color: #f8d974; /* Accent */
 }
 
-/* Responsive (stack on small screens) */
+/* --- Account Dropdown --- */
+.account-dropdown {
+  position: relative;
+}
+
+.account-button {
+  background: none;
+  border: none;
+  color: #e2e8f0;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.account-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 2.5rem;
+  background-color: #334155; /* Slate-700 */
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.account-dropdown:hover .account-menu {
+  display: block;
+}
+
+.logout-button {
+  background: none;
+  border: none;
+  color: #f1f5f9;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.logout-button:hover {
+  color: #f8d974;
+}
+
+.account-menu a {
+  color: #f1f5f9;
+  text-decoration: none;
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.account-menu a:hover {
+  color: #f8d974;
+}
+
+.account-dropdown:hover .account-menu,
+.account-menu:hover {
+  display: block;
+}
+
+.account-dropdown {
+  position: relative;
+}
+
+.account-menu {
+  position: absolute;
+  top: 100%; /* aligns directly below the button */
+  right: 0;
+  z-index: 10;
+  background-color: #334155;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  display: none;
+  min-width: 160px;
+}
+
+
+.auth-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.auth-links a {
+  text-decoration: none;
+  color: #e2e8f0; /* Slate-200 */
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.auth-links a:hover {
+  color: #f8d974; /* Accent color on hover */
+}
+
+
+/* Responsive */
 @media (max-width: 600px) {
-    header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
 
-    #nav_menu ul {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
+  #nav_menu ul {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
+

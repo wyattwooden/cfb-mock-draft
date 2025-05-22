@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- templates/mock-draft/mock_settings.html -->
+{% extends "base.html" %}
+
+{% block title %}Mock Draft Settings{% endblock %}
+
+{% block content %}
+  <h2>Set Up Your Mock Draft</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="form-grid">
+      <label for="id_num_teams">Number of Teams:</label>
+      {{ form.num_teams.as_widget }}
+
+      <label for="id_qb">QB:</label>
+      {{ form.qb }}
+
+      <label for="id_rb">RB:</label>
+      {{ form.rb }}
+
+      <label for="id_wr">WR:</label>
+      {{ form.wr }}
+
+      <label for="id_te">TE:</label>
+      {{ form.te }}
+
+      <label for="id_flex">Flex:</label>
+      {{ form.flex }}
+
+      <label for="id_k">K:</label>
+      {{ form.k }}
+
+      <label for="id_dst">DST:</label>
+      {{ form.dst }}
+
+      <label for="id_bench">Bench:</label>
+      {{ form.bench }}
+    </div>
+
+    <button type="submit">Start Mock Now</button>
+  </form>
+{% endblock %}
