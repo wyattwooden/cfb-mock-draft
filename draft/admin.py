@@ -28,3 +28,4 @@ class PositionAdmin(admin.ModelAdmin):
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
     list_display = ("player_name", "position", "team", "class_year",)
+    search_fields = ("player_name", "team__team_name", "position__abbreviation")
