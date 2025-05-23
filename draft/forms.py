@@ -13,5 +13,5 @@ class MockDraftSettingsForm(forms.Form):
     flex = forms.IntegerField(min_value=0, max_value=10, initial=1)
     k = forms.IntegerField(min_value=0, max_value=4, initial=1)
     dst = forms.IntegerField(min_value=0, max_value=4, initial=1)
-    bench = forms.IntegerField(min_value=0, max_value=20, initial=4)
+    bench = forms.IntegerField(min_value=0, max_value=20, initial=6)
 
