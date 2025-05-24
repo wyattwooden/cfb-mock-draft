@@ -15,6 +15,9 @@
       <label for="id_num_teams">Number of Teams:</label>
       {{ form.num_teams.as_widget }}
 
+      <label for="id_draft_slot">Your Draft Slot:</label>
+      {{ form.draft_slot }}
+
       <label for="id_qb">QB:</label>
       {{ form.qb }}
 
@@ -42,4 +45,35 @@
 
     <button type="submit">Start Mock Now</button>
   </form>
+
+  <script>
+    const numTeamsSelect = document.getElementById("id_num_teams");
+    const draftSlotSelect = document.getElementById("id_draft_slot");
+  
+    function updateDraftSlots() {
+      const numTeams = parseInt(numTeamsSelect.value);
+      const currentSelection = draftSlotSelect.value;
+  
+      draftSlotSelect.innerHTML = "";
+  
+      for (let i = 1; i <= numTeams; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = `Pick ${i}`;
+  
+        if (i.toString() === currentSelection) {
+          option.selected = true;
+        }
+  
+        draftSlotSelect.appendChild(option);
+      }
+    }
+  
+    numTeamsSelect.addEventListener("change", updateDraftSlots);
+    window.addEventListener("load", updateDraftSlots);
+  </script>
 {% endblock %}
+
+
+
+

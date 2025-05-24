@@ -3,6 +3,8 @@ from django.views.generic import TemplateView, FormView
 from django.urls import reverse_lazy
 from .forms import MockDraftSettingsForm
 from .models import Player
+from .draft_engine import run_auto_draft, build_empty_draft_board
+from django.core.paginator import Paginator
 
 class HomePageView(TemplateView):
     template_name = "home.html"
@@ -37,46 +39,42 @@ from django.db.models import F, Value, BooleanField, ExpressionWrapper, Case, Wh
 class MockDraftView(TemplateView):
     template_name = "mock-draft/draft_board.html"
 
+    # called automatically by django, if other functions needed they are called in here and defined below this function
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        request = self.request
+        
+        # Extract draft settings and key values
+        settings, num_teams, draft_slot, user_team_index, num_rounds = self.get_draft_settings()
 
-        settings = request.session.get("mock_settings", {})
-        num_teams = int(settings.get("num_teams", 12))
+        # initializing an empty draft board structure (rounds x teams)
+        draft_board = build_empty_draft_board(num_rounds, num_teams)
 
-        num_rounds = sum([
-            int(settings.get("qb", 0)),
-            int(settings.get("rb", 0)),
-            int(settings.get("wr", 0)),
-            int(settings.get("te", 0)),
-            int(settings.get("flex", 0)),
-            int(settings.get("k", 0)),
-            int(settings.get("dst", 0)),
-            int(settings.get("bench", 0)),
-        ])
+        # retrieve filtered, sorted, and paginated players for display
+        page_obj, selected_position = self.get_display_players()
 
-        draft_board = []
-        for rnd in range(1, num_rounds + 1):
-            row = []
-            for team in range(1, num_teams + 1):
-                pick_number = f"{rnd}.{str(team).zfill(2)}"
-                row.append({
-                    "team": team,
-                    "round": rnd,
-                    "pick": pick_number,
-                    "player": None
-                })
-            draft_board.append(row)
+        # calling function to start the draft
+        run_auto_draft()
 
-        # 🟨 Position filter from GET
-        selected_position = request.GET.get("position")
+        context.update({
+            "settings": settings,
+            "num_teams": num_teams,
+            "num_rounds": num_rounds,
+            "draft_board": draft_board,
+            "players": page_obj.object_list,
+            "page_obj": page_obj,
+            "selected_position": selected_position,
+            "user_team_index": user_team_index,
+        })
 
+        return context
+
+    def get_display_players(self):
+        selected_position = self.request.GET.get("position")
         players_qs = Player.objects.all()
+
         if selected_position:
             players_qs = players_qs.filter(position__abbreviation=selected_position)
 
-
-        # Sort by: has_adp DESC, adp ASC, name ASC
         players = players_qs.annotate(
             has_adp=Case(
                 When(adp__isnull=False, then=Value(True)),
@@ -85,16 +83,22 @@ class MockDraftView(TemplateView):
             )
         ).order_by('-has_adp', 'adp', 'player_name')
 
-        context.update({
-            "settings": settings,
-            "num_teams": num_teams,
-            "num_rounds": num_rounds,
-            "draft_board": draft_board,
-            "players": players,
-            "selected_position": selected_position,
-        })
-        return context
+        paginator = Paginator(players, 100)
+        page_number = self.request.GET.get("page", 1)
+        page_obj = paginator.get_page(page_number)
 
+        return page_obj, selected_position
+
+    def get_draft_settings(self):
+        settings = self.request.session.get("mock_settings", {})
+        num_teams = int(settings.get("num_teams", 12))
+        draft_slot = int(settings.get("draft_slot", 1))  # 1-based (e.g. pick 6)
+        user_team_index = draft_slot - 1                # Convert to 0-based
+        num_rounds = settings.get("num_rounds", 15)
+
+        return settings, num_teams, draft_slot, user_team_index, num_rounds
+
+  
 
 
 class DraftHistoryView(TemplateView):

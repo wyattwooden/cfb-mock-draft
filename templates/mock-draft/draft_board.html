@@ -8,33 +8,46 @@
 {% block content %}
 <div class="draft-container">
   
-    <!-- Column 1: Player Rankings -->
+  <!-- Column 1: Player Rankings -->
+  <div class="player-rankings">
+    <h2 class="section-title">Player Rankings</h2>
     <div class="player-rankings">
-        <h2 class="section-title">Player Rankings</h2>
-        <div class="player-rankings">
 
-          <div class="position-filter-bar">
-            <a href="?" class="position-filter-button {% if not selected_position %}active{% endif %}">All</a>
-            <a href="?position=QB" class="position-filter-button {% if selected_position == 'QB' %}active{% endif %}">QB</a>
-            <a href="?position=RB" class="position-filter-button {% if selected_position == 'RB' %}active{% endif %}">RB</a>
-            <a href="?position=WR" class="position-filter-button {% if selected_position == 'WR' %}active{% endif %}">WR</a>
-            <a href="?position=TE" class="position-filter-button {% if selected_position == 'TE' %}active{% endif %}">TE</a>
-            <a href="?position=K" class="position-filter-button {% if selected_position == 'K' %}active{% endif %}">K</a>
-          </div>
+      <div class="position-filter-bar">
+        <a href="?" class="position-filter-button {% if not selected_position %}active{% endif %}">All</a>
+        <a href="?position=QB" class="position-filter-button {% if selected_position == 'QB' %}active{% endif %}">QB</a>
+        <a href="?position=RB" class="position-filter-button {% if selected_position == 'RB' %}active{% endif %}">RB</a>
+        <a href="?position=WR" class="position-filter-button {% if selected_position == 'WR' %}active{% endif %}">WR</a>
+        <a href="?position=TE" class="position-filter-button {% if selected_position == 'TE' %}active{% endif %}">TE</a>
+        <a href="?position=K" class="position-filter-button {% if selected_position == 'K' %}active{% endif %}">K</a>
+      </div>
 
+      <ul class="player-list">
+        {% for player in players %}
+          <li class="player-item">
+            <strong>{{ player.player_name }}</strong> – {{ player.position }} | {{ player.team }}
+            <span class="adp">
+              ADP: {% if player.adp is not None %}{{ player.adp }}{% else %}-{% endif %}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
 
-          <ul class="player-list">
-            {% for player in players %}
-              <li class="player-item">
-                <strong>{{ player.player_name }}</strong> – {{ player.position }} | {{ player.team }}
-                <span class="adp">
-                  ADP: {% if player.adp is not None %}{{ player.adp }}{% else %}-{% endif %}
-                </span>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
+      <div class="pagination" style="text-align: center; margin-top: 1rem;">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}{% if selected_position %}&position={{ selected_position }}{% endif %}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if selected_position %}&position={{ selected_position }}{% endif %}">Next</a>
+        {% endif %}
+      </div>
+
     </div>
+  </div>
+
     
 
     <!-- Column 2: Draft Board -->
@@ -42,7 +55,13 @@
         <h2 class="section-title">Draft Board</h2>
         <div class="draft-board-grid">
           {% for team_num in num_teams|make_range %}
-            <div class="draft-header">Team {{ team_num|add:1 }}</div>
+            <div class="draft-header">
+              {% if team_num == user_team_index %}
+                Your Team
+              {% else %}
+                Team {{ team_num|add:1 }}
+              {% endif %}
+            </div>
           {% endfor %}
         </div>
         
@@ -64,38 +83,38 @@
     </div>
     
 
-    <!-- Column 3: My Team -->
-    <div class="your-roster">
-        <h2 class="section-title">My Team</h2>
-        
-        {% if settings %}
-        <div class="team-roster">
-            <h3>Starters</h3>
-            {% for pos, count in settings.items %}
-              {% if pos != 'num_teams' and pos != 'bench' and count > 0 %}
-                  {% for i in count|make_range %}
-                      <div class="roster-spot">
-                          <span class="position-label">{{ pos|upper }}</span>
-                          <span class="player-slot skeleton-loader"></span>
-                      </div>
-                  {% endfor %}
-              {% endif %}
-          {% endfor %}
+  <!-- Column 3: My Team -->
+  <div class="your-roster">
+    <h2 class="section-title">My Team</h2>
+    
+    {% if settings %}
+    <div class="team-roster">
+        <h3>Starters</h3>
+        {% for pos, count in settings.items %}
+            {% if pos != 'num_teams' and pos != 'bench' and pos != 'num_rounds' %}
+                {% if count > 0 %}
+                    {% for i in count|make_range %}
+                        <div class="roster-spot">
+                            <span class="position-label">{{ pos|upper }}</span>
+                            <span class="player-slot skeleton-loader"></span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
 
-          <h3>Bench</h3>
-          {% for i in settings.bench|make_range %}
-              <div class="roster-spot">
-                  <span class="position-label">BN</span>
-                  <span class="player-slot skeleton-loader"></span>
-              </div>
-          {% endfor %}
-
-        </div>
-        {% else %}
-        <p>No roster settings found. Please configure your mock draft first.</p>
-        {% endif %}
-
+        <h3>Bench</h3>
+        {% for i in settings.bench|make_range %}
+            <div class="roster-spot">
+                <span class="position-label">BN</span>
+                <span class="player-slot skeleton-loader"></span>
+            </div>
+        {% endfor %}
     </div>
+    {% else %}
+    <p>No roster settings found. Please configure your mock draft first.</p>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
 

@@ -28,12 +28,12 @@ class Player(models.Model):
     player_name = models.CharField(max_length=100)
     alternate_names = models.TextField(null=True, blank=True)
     team = models.ForeignKey(CollegeTeam, on_delete=models.SET_NULL, null=True)
-    position = models.ForeignKey(Position, on_delete=models.SET_NULL, null=True)
+    position = models.ForeignKey(Position, on_delete=models.SET_NULL, null=True, db_index=True)
     jersey = models.IntegerField(blank=True, null=True)
     class_year = models.CharField(max_length=20, blank=True, null=True)
     player_url = models.URLField(max_length=300, blank=True)
     player_stats_url = models.URLField(max_length=300, blank=True)
-    adp = models.FloatField(null=True, blank=True)
+    adp = models.FloatField(null=True, blank=True, db_index=True)
 
     def __str__(self):
         return self.player_name
