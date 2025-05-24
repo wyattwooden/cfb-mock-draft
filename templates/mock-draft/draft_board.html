@@ -29,9 +29,11 @@
             <span class="adp">
               ADP: {% if player.adp is not None %}{{ player.adp }}{% else %}-{% endif %}
             </span>
+            <button class="draft-button" data-player-id="{{ player.id }}">Draft</button>
           </li>
         {% endfor %}
       </ul>
+
 
       <div class="pagination" style="text-align: center; margin-top: 1rem;">
         {% if page_obj.has_previous %}
@@ -53,6 +55,7 @@
     <!-- Column 2: Draft Board -->
     <div class="draft-board">
         <h2 class="section-title">Draft Board</h2>
+
         <div class="draft-board-grid">
           {% for team_num in num_teams|make_range %}
             <div class="draft-header">
@@ -69,7 +72,7 @@
         {% for round in draft_board %}
           <div class="draft-board-grid">
             {% for cell in round %}
-              <div class="draft-cell">
+              <div class="draft-cell" data-pick="{{ cell.pick }}">
                 {% if cell.player %}
                   <strong>{{ cell.player.name }}</strong><br>
                   {{ cell.player.position }} – {{ cell.player.team }}
@@ -116,5 +119,44 @@
     {% endif %}
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".draft-button").forEach(button => {
+    button.addEventListener("click", async () => {
+      const playerId = button.getAttribute("data-player-id");
+
+      const response = await fetch("{% url 'draft_player_ajax' %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ player_id: playerId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update affected cells
+        data.updated_cells.forEach(cell => {
+          const selector = `[data-pick='${cell.pick}']`;
+          const cellEl = document.querySelector(selector);
+          if (cellEl) {
+            cellEl.innerHTML = `<strong>${cell.name}</strong><br>${cell.position} – ${cell.team}`;
+          }
+        });
+
+        // Optionally remove drafted player from list
+        button.closest(".player-item").remove();
+      } else {
+        alert(data.error || "Pick failed.");
+      }
+    });
+  });
+});
+</script>
+
+
 {% endblock %}
 
