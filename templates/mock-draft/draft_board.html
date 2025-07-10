@@ -11,25 +11,28 @@
   <!-- Column 1: Player Rankings -->
   <div class="player-rankings">
     <h2 class="section-title">Player Rankings</h2>
-    <div class="player-rankings">
+    <div class="player-rankings-content">
 
       <div class="position-filter-bar">
-        <a href="?" class="position-filter-button {% if not selected_position %}active{% endif %}">All</a>
-        <a href="?position=QB" class="position-filter-button {% if selected_position == 'QB' %}active{% endif %}">QB</a>
-        <a href="?position=RB" class="position-filter-button {% if selected_position == 'RB' %}active{% endif %}">RB</a>
-        <a href="?position=WR" class="position-filter-button {% if selected_position == 'WR' %}active{% endif %}">WR</a>
-        <a href="?position=TE" class="position-filter-button {% if selected_position == 'TE' %}active{% endif %}">TE</a>
-        <a href="?position=K" class="position-filter-button {% if selected_position == 'K' %}active{% endif %}">K</a>
+        <a href="#" class="position-filter-button active" data-position="">All</a>
+        <a href="#" class="position-filter-button" data-position="QB">QB</a>
+        <a href="#" class="position-filter-button" data-position="RB">RB</a>
+        <a href="#" class="position-filter-button" data-position="WR">WR</a>
+        <a href="#" class="position-filter-button" data-position="TE">TE</a>
+        <a href="#" class="position-filter-button" data-position="K">K</a>
       </div>
+
 
       <ul class="player-list">
         {% for player in players %}
           <li class="player-item">
-            <strong>{{ player.player_name }}</strong> – {{ player.position }} | {{ player.team }}
             <span class="adp">
-              ADP: {% if player.adp is not None %}{{ player.adp }}{% else %}-{% endif %}
+              {% if player.adp is not None %}{{ player.adp }}{% else %}-{% endif %}
             </span>
-            <button class="draft-button" data-player-id="{{ player.id }}">Draft</button>
+            <strong>{{ player.player_name }}</strong> ({{ player.position }}) {{ player.team }}
+            <span class="draft-btn-wrapper">
+              <button class="draft-button" data-player-id="{{ player.id }}">Draft</button>
+            </span>
           </li>
         {% endfor %}
       </ul>
@@ -121,41 +124,103 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".draft-button").forEach(button => {
-    button.addEventListener("click", async () => {
-      const playerId = button.getAttribute("data-player-id");
+  document.addEventListener("DOMContentLoaded", function () {
 
-      const response = await fetch("{% url 'draft_player_ajax' %}", {
-        method: "POST",
-        headers: {
-          "X-CSRFToken": "{{ csrf_token }}",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ player_id: playerId })
-      });
+    // Function to attach draft button listeners (used for initial and refreshed lists)
+    function attachDraftButtonListeners(buttons) {
+      buttons.forEach(button => {
+        button.addEventListener("click", async () => {
+          const playerId = button.getAttribute("data-player-id");
 
-      const data = await response.json();
+          const response = await fetch("{% url 'draft_player_ajax' %}", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ player_id: playerId })
+          });
 
-      if (data.success) {
-        // Update affected cells
-        data.updated_cells.forEach(cell => {
-          const selector = `[data-pick='${cell.pick}']`;
-          const cellEl = document.querySelector(selector);
-          if (cellEl) {
-            cellEl.innerHTML = `<strong>${cell.name}</strong><br>${cell.position} – ${cell.team}`;
+          const data = await response.json();
+
+          if (data.success) {
+            data.updated_cells.forEach(cell => {
+              const selector = `[data-pick='${cell.pick}']`;
+              const cellEl = document.querySelector(selector);
+              if (cellEl) {
+                cellEl.innerHTML = `<strong>${cell.name}</strong><br>${cell.position} – ${cell.team}`;
+              }
+            });
+
+            const playerSlots = document.querySelectorAll('.your-roster .player-slot');
+            data.user_roster.forEach((player, index) => {
+              if (player && playerSlots[index]) {
+                playerSlots[index].textContent = player.name;
+              }
+            });
+
+            // Remove drafted players (user + auto-drafted) from the list
+            data.updated_cells.forEach(cell => {
+              const allPlayerItems = document.querySelectorAll(".player-item");
+              allPlayerItems.forEach(item => {
+                const btn = item.querySelector(".draft-button");
+                if (btn && btn.dataset.playerId === String(cell.player_id)) {
+                  item.remove();
+                }
+              });
+            });
+
+            // Refresh the player list to exclude auto-drafted players
+            const activeFilter = document.querySelector('.position-filter-button.active');
+            const position = activeFilter ? activeFilter.dataset.position : "";
+
+            fetch(`/mock/filter_players/?position=${position}`)
+              .then(response => response.json())
+              .then(data => {
+                document.querySelector('.player-list').outerHTML = data.html;
+                // Reattach listeners to the new draft buttons
+                attachDraftButtonListeners(document.querySelectorAll(".draft-button"));
+              });
+
+          } else {
+            alert(data.error || "Pick failed.");
           }
         });
+      });
+    }
 
-        // Optionally remove drafted player from list
-        button.closest(".player-item").remove();
-      } else {
-        alert(data.error || "Pick failed.");
-      }
+    // Attach draft button listeners on page load
+    attachDraftButtonListeners(document.querySelectorAll(".draft-button"));
+
+    // Position filter buttons logic
+    document.querySelectorAll('.position-filter-button').forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const position = this.dataset.position;
+
+        fetch(`/mock/filter_players/?position=${position}`)
+          .then(response => response.json())
+          .then(data => {
+            document.querySelector('.player-list').outerHTML = data.html;
+
+            // Reattach draft button listeners to new elements
+            attachDraftButtonListeners(document.querySelectorAll(".draft-button"));
+
+            // Update active button styling
+            document.querySelectorAll('.position-filter-button').forEach(btn =>
+              btn.classList.remove('active')
+            );
+            this.classList.add('active');
+          })
+          .catch(err => console.error('Fetch failed', err));
+      });
     });
+
   });
-});
 </script>
+
+
 
 
 {% endblock %}

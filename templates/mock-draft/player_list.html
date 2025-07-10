@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+
+<ul class="player-list">
+  {% for player in players %}
+    <li class="player-item">
+      <span class="adp">
+        {% if player.adp is not None %}{{ player.adp }}{% else %}-{% endif %}
+      </span>
+      <strong>{{ player.player_name }}</strong> ({{ player.position }}) {{ player.team }}
+      <span class="draft-btn-wrapper">
+        <button class="draft-button" data-player-id="{{ player.id }}">Draft</button>
+      </span>
+    </li>
+  {% endfor %}
+</ul>
+

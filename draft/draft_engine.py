@@ -40,34 +40,36 @@ def initialize_draft_teams(num_teams, user_team_index):
         })
     return teams   
 
-def make_next_pick(session, players):
+def make_next_pick(session, all_players):
+
+    # gathering info from the current draft
     draft_board = session["draft_board"]
     drafted_ids = session["drafted_ids"]
     draft_teams = session["draft_teams"]
     num_rounds = len(draft_board)
     picks_per_round = len(draft_teams)
 
-    # Track overall pick number (0-based)
+    # track overall pick number (0-based)
     current_pick_num = session.get("current_pick_num", 0)
 
-    # ✅ End draft if no picks remain
+    # end draft if no picks remain
     total_picks = num_rounds * picks_per_round
     if current_pick_num >= total_picks:
         return False
 
-    # Locate current cell from flattened board
+    # locate current cell from flattened board
     current_round = current_pick_num // picks_per_round
     team_index_in_round = current_pick_num % picks_per_round
     cell = draft_board[current_round][team_index_in_round]
     team_index = cell["team"]
     team = draft_teams[team_index]
 
-    # ✅ Stop for user pick
+    # stop for user pick
     if team["is_user"]:
         return False
 
-    # 🧠 Auto-pick next available player
-    for player in players:
+    # auto-pick next available player
+    for player in all_players:
         if player.id not in drafted_ids:
             drafted_player = player
             break

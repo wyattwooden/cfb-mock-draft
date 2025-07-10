@@ -1,3 +1,4 @@
+/* ========== Layout Container ========== */
 .draft-container {
     display: flex;
     gap: 20px;
@@ -6,6 +7,7 @@
     align-items: stretch;
 }
 
+/* Shared column styles */
 .player-rankings,
 .draft-board,
 .your-roster {
@@ -16,33 +18,109 @@
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
     flex: 1;
     min-height: 0;
+    overflow-y: auto;
+    max-height: calc(100vh - 40px);
 }
 
+
+/* ========== Column 1: Player Rankings ========== */
 .player-rankings {
     flex: 1;
 }
 
+.player-rankings-content {
+    margin-left: 0;
+}
+
+.position-filter-bar {
+    margin-bottom: 0.5rem;
+}
+
+.position-filter-button {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 6px 10px;
+    background-color: #e2e8f0;
+    color: #1e293b;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.position-filter-button.active {
+    background-color: #1e293b;
+    color: white;
+}
+
+.player-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.player-list li {
+    position: relative;
+    margin-bottom: 0.25rem;
+}
+
+/* Draft button + hover reveal */
+.draft-btn-wrapper {
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+}
+
+.draft-button {
+    background-color: #1e293b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.draft-button:hover {
+    background-color: #334155;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.player-item .draft-button {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.player-item:hover .draft-button {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+
+/* ========== Column 2: Draft Board ========== */
 .draft-board {
     flex: 2;
     min-width: 400px;
 }
 
+
+/* ========== Column 3: My Team ========== */
 .your-roster {
     flex: 1;
 }
 
-/* Add some basic styling for the content */
+
+/* ========== Shared Elements ========== */
 .section-title {
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 15px;
     color: #333;
-}
-
-/* Make sure the content is scrollable if it overflows */
-.player-rankings, .draft-board, .your-roster {
-    overflow-y: auto;
-    max-height: calc(100vh - 40px);
 }
