@@ -10,3 +10,8 @@ def make_range(value):
 @register.filter
 def upper(value):
     return str(value).upper()
+
+@register.filter
+def dict_key(d, key):
+    """Access dictionary values by key in templates"""
+    return d.get(key, [])

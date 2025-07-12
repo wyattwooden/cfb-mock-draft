@@ -120,7 +120,7 @@ def draft_player_ajax(request):
     } for p in ordered_user_players]
 
     # Prepare user roster ordered by position using helper function
-    user_roster_ordered = get_user_roster_ordered(session, draft_teams, request.session.get("mock_settings", {}))
+    user_roster_ordered = sort_user_roster(user_roster_data, request.session.get("mock_settings", {}))
 
     return JsonResponse({
         "success": True,
@@ -336,3 +336,49 @@ def filter_players_ajax(request):
     html = render_to_string("mock-draft/player_list.html", {"players": players})
     return JsonResponse({"html": html})
 
+
+
+# HELPER FUNCTIONS
+def sort_user_roster(players, settings):
+    """
+    Sort drafted players into roster slots based on the settings.
+    Input: list of player dicts, and settings dict
+    Output: ordered list of players
+    """
+    slots = {
+        "qb": settings.get("qb", 0),
+        "rb": settings.get("rb", 0),
+        "wr": settings.get("wr", 0),
+        "te": settings.get("te", 0),
+        "flex": settings.get("flex", 0),
+        "k": settings.get("k", 0),
+        "dst": settings.get("dst", 0),
+        "bench": settings.get("bench", 0),
+    }
+
+    positions_order = ["qb", "rb", "wr", "te", "flex", "k", "dst", "bench"]
+    flex_eligible = {"rb", "wr", "te"}
+
+    filled = {pos: 0 for pos in positions_order}
+    sorted_team = [None] * sum(slots.values())
+
+    for p in players:
+        pos = p["position"].lower()
+
+        # Try main position
+        if pos in slots and filled[pos] < slots[pos]:
+            index = sum(slots[o] for o in positions_order[:positions_order.index(pos)]) + filled[pos]
+            sorted_team[index] = p
+            filled[pos] += 1
+        # Try FLEX
+        elif pos in flex_eligible and filled["flex"] < slots["flex"]:
+            index = sum(slots[o] for o in positions_order[:positions_order.index("flex")]) + filled["flex"]
+            sorted_team[index] = p
+            filled["flex"] += 1
+        # Otherwise, go to bench
+        elif filled["bench"] < slots["bench"]:
+            index = sum(slots[o] for o in positions_order[:positions_order.index("bench")]) + filled["bench"]
+            sorted_team[index] = p
+            filled["bench"] += 1
+
+    return [p for p in sorted_team if p]  # Remove None slots

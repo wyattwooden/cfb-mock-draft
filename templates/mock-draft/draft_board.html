@@ -92,33 +92,36 @@
   <!-- Column 3: My Team -->
   <div class="your-roster">
     <h2 class="section-title">My Team</h2>
-    
+
     {% if settings %}
     <div class="team-roster">
-        <h3>Starters</h3>
-        {% for pos, count in settings.items %}
-            {% if pos != 'num_teams' and pos != 'bench' and pos != 'num_rounds' %}
-                {% if count > 0 %}
-                    {% for i in count|make_range %}
-                        <div class="roster-spot">
-                            <span class="position-label">{{ pos|upper }}</span>
-                            <span class="player-slot skeleton-loader"></span>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endif %}
-        {% endfor %}
+      <h3>Starters</h3>
+      {% for pos, count in settings.items %}
+        {% if pos != 'num_teams' and pos != 'bench' and pos != 'num_rounds' %}
+          {% if count > 0 %}
+            {% for i in count|make_range %}
+              <div class="roster-spot">
+                <span class="position-label {{ pos|upper }}">
+                  {% if pos == 'flex' %}FLX{% else %}{{ pos|upper }}{% endif %}
+                </span>
+                <span class="player-slot skeleton-loader" data-position="{{ pos|lower }}"></span>
+                <span class="testing">Testing</span>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
 
-        <h3>Bench</h3>
-        {% for i in settings.bench|make_range %}
-            <div class="roster-spot">
-                <span class="position-label">BN</span>
-                <span class="player-slot skeleton-loader"></span>
-            </div>
-        {% endfor %}
+      <h3>Bench</h3>
+      {% for i in settings.bench|make_range %}
+        <div class="roster-spot">
+          <span class="position-label">BN</span>
+          <span class="player-slot skeleton-loader" data-position="bench"></span>
+        </div>
+      {% endfor %}
     </div>
     {% else %}
-    <p>No roster settings found. Please configure your mock draft first.</p>
+      <p>No roster settings found. Please configure your mock draft first.</p>
     {% endif %}
   </div>
 </div>
@@ -126,7 +129,6 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
 
-    // Function to attach draft button listeners (used for initial and refreshed lists)
     function attachDraftButtonListeners(buttons) {
       buttons.forEach(button => {
         button.addEventListener("click", async () => {
@@ -144,6 +146,7 @@
           const data = await response.json();
 
           if (data.success) {
+            // Update draft board cells
             data.updated_cells.forEach(cell => {
               const selector = `[data-pick='${cell.pick}']`;
               const cellEl = document.querySelector(selector);
@@ -152,14 +155,56 @@
               }
             });
 
-            const playerSlots = document.querySelectorAll('.your-roster .player-slot');
-            data.user_roster.forEach((player, index) => {
-              if (player && playerSlots[index]) {
-                playerSlots[index].textContent = player.name;
+            // Reset all your-roster slots
+            const allSlots = document.querySelectorAll(".your-roster .player-slot");
+            allSlots.forEach(slot => slot.textContent = "");
+
+            // Refill roster with ordered players
+            const positionCounts = {
+              qb: 0, rb: 0, wr: 0, te: 0, k: 0, dst: 0, flex: 0, bench: 0
+            };
+            const maxCounts = {
+              qb: document.querySelectorAll('.player-slot[data-position="qb"]').length,
+              rb: document.querySelectorAll('.player-slot[data-position="rb"]').length,
+              wr: document.querySelectorAll('.player-slot[data-position="wr"]').length,
+              te: document.querySelectorAll('.player-slot[data-position="te"]').length,
+              k: document.querySelectorAll('.player-slot[data-position="k"]').length,
+              dst: document.querySelectorAll('.player-slot[data-position="dst"]').length,
+              flex: document.querySelectorAll('.player-slot[data-position="flex"]').length,
+              bench: document.querySelectorAll('.player-slot[data-position="bench"]').length
+            };
+
+            const flexEligible = ['rb', 'wr', 'te'];
+
+            data.user_roster.forEach(player => {
+              let pos = player.position.toLowerCase();
+
+              if (pos in positionCounts && positionCounts[pos] < maxCounts[pos]) {
+                const slot = document.querySelectorAll(`.player-slot[data-position="${pos}"]`)[positionCounts[pos]];
+                if (slot) slot.innerHTML = `<strong>${player.name}</strong> ${player.team}`;
+                positionCounts[pos]++;
+              }
+              else if (flexEligible.includes(pos) && positionCounts.flex < maxCounts.flex) {
+                const slot = document.querySelectorAll(`.player-slot[data-position="flex"]`)[positionCounts.flex];
+                if (slot) slot.innerHTML = `<strong>${player.name}</strong> ${player.team}`;
+                positionCounts.flex++;
+              }
+              else if (positionCounts.bench < maxCounts.bench) {
+                const slot = document.querySelectorAll(`.player-slot[data-position="bench"]`)[positionCounts.bench];
+                if (slot) {
+                  slot.innerHTML = `<strong>${player.name}</strong> ${player.team}`;
+
+                  // Update the position label span next to it
+                  const parent = slot.closest('.roster-spot');
+                  const label = parent.querySelector('.position-label');
+                  label.textContent = player.position.toUpperCase(); // change 'BN' to 'WR', 'RB', etc.
+                  label.className = `position-label ${player.position.toUpperCase()}`; // update class too
+                }
+                positionCounts.bench++;
               }
             });
 
-            // Remove drafted players (user + auto-drafted) from the list
+            // Remove drafted players from the pool
             data.updated_cells.forEach(cell => {
               const allPlayerItems = document.querySelectorAll(".player-item");
               allPlayerItems.forEach(item => {
@@ -170,7 +215,7 @@
               });
             });
 
-            // Refresh the player list to exclude auto-drafted players
+            // Refresh player list
             const activeFilter = document.querySelector('.position-filter-button.active');
             const position = activeFilter ? activeFilter.dataset.position : "";
 
@@ -178,7 +223,6 @@
               .then(response => response.json())
               .then(data => {
                 document.querySelector('.player-list').outerHTML = data.html;
-                // Reattach listeners to the new draft buttons
                 attachDraftButtonListeners(document.querySelectorAll(".draft-button"));
               });
 
@@ -189,10 +233,8 @@
       });
     }
 
-    // Attach draft button listeners on page load
     attachDraftButtonListeners(document.querySelectorAll(".draft-button"));
 
-    // Position filter buttons logic
     document.querySelectorAll('.position-filter-button').forEach(button => {
       button.addEventListener('click', function (e) {
         e.preventDefault();
@@ -203,11 +245,8 @@
           .then(response => response.json())
           .then(data => {
             document.querySelector('.player-list').outerHTML = data.html;
-
-            // Reattach draft button listeners to new elements
             attachDraftButtonListeners(document.querySelectorAll(".draft-button"));
 
-            // Update active button styling
             document.querySelectorAll('.position-filter-button').forEach(btn =>
               btn.classList.remove('active')
             );
@@ -220,8 +259,4 @@
   });
 </script>
 
-
-
-
 {% endblock %}
-
