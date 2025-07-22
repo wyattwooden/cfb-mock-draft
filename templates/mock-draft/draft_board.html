@@ -53,8 +53,6 @@
     </div>
   </div>
 
-    
-
     <!-- Column 2: Draft Board -->
     <div class="draft-board">
         <h2 class="section-title">Draft Board</h2>
@@ -104,8 +102,7 @@
                 <span class="position-label {{ pos|upper }}">
                   {% if pos == 'flex' %}FLX{% else %}{{ pos|upper }}{% endif %}
                 </span>
-                <span class="player-slot skeleton-loader" data-position="{{ pos|lower }}"></span>
-                <span class="testing">Testing</span>
+                <div class="player-slot skeleton-loader" data-position="{{ pos|lower }}"></div>
               </div>
             {% endfor %}
           {% endif %}
@@ -181,24 +178,54 @@
 
               if (pos in positionCounts && positionCounts[pos] < maxCounts[pos]) {
                 const slot = document.querySelectorAll(`.player-slot[data-position="${pos}"]`)[positionCounts[pos]];
-                if (slot) slot.innerHTML = `<strong>${player.name}</strong> ${player.team}`;
+                if (slot) {
+                  const pickStr = player.round && player.pick_in_round
+                    ? `${player.round}.${String(player.pick_in_round).padStart(2, '0')}`
+                    : '';
+                  slot.innerHTML = `
+                      <div class="player-line">
+                        <strong class="drafted-player-name">${player.name}</strong>  
+                        <span class="player-team">${player.team}</span>
+                        <span class="draft-pick">${pickStr}</span>
+                      </div>
+                  `;
+                }
                 positionCounts[pos]++;
               }
               else if (flexEligible.includes(pos) && positionCounts.flex < maxCounts.flex) {
                 const slot = document.querySelectorAll(`.player-slot[data-position="flex"]`)[positionCounts.flex];
-                if (slot) slot.innerHTML = `<strong>${player.name}</strong> ${player.team}`;
+                if (slot) {
+                  const pickStr = player.round && player.pick_in_round
+                    ? `${player.round}.${String(player.pick_in_round).padStart(2, '0')}`
+                    : '';
+                  slot.innerHTML = `
+                      <div class="player-line">
+                        <strong class="drafted-player-name">${player.name}</strong>  
+                        <span class="player-team">${player.team}</span>
+                        <span class="draft-pick">${pickStr}</span>
+                      </div>
+                  `;
+                }
                 positionCounts.flex++;
               }
               else if (positionCounts.bench < maxCounts.bench) {
                 const slot = document.querySelectorAll(`.player-slot[data-position="bench"]`)[positionCounts.bench];
                 if (slot) {
-                  slot.innerHTML = `<strong>${player.name}</strong> ${player.team}`;
+                  const pickStr = player.round && player.pick_in_round
+                    ? `${player.round}.${String(player.pick_in_round).padStart(2, '0')}`
+                    : '';
+                  slot.innerHTML = `
+                      <div class="player-line">
+                        <strong class="drafted-player-name">${player.name}</strong>  
+                        <span class="player-team">${player.team}</span>
+                        <span class="draft-pick">${pickStr}</span>
+                      </div>
+                  `;
 
-                  // Update the position label span next to it
                   const parent = slot.closest('.roster-spot');
                   const label = parent.querySelector('.position-label');
-                  label.textContent = player.position.toUpperCase(); // change 'BN' to 'WR', 'RB', etc.
-                  label.className = `position-label ${player.position.toUpperCase()}`; // update class too
+                  label.textContent = player.position.toUpperCase();
+                  label.className = `position-label ${player.position.toUpperCase()}`;
                 }
                 positionCounts.bench++;
               }

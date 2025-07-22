@@ -82,8 +82,11 @@ def draft_player_ajax(request):
         "name": player.player_name,
         "position": player.position.abbreviation,
         "team": player.team.team_name if player.team else "N/A",
-        "player_id": player.id, 
+        "player_id": player.id,
+        "round": ((cell["pick"] - 1) // picks_per_round) + 1,
+        "pick_in_round": ((cell["pick"] - 1) % picks_per_round) + 1,
     }]
+
 
     # auto-draft others
     all_players = Player.objects.select_related("position", "team").filter(adp__isnull=False).order_by('adp')
@@ -101,6 +104,8 @@ def draft_player_ajax(request):
                 "position": auto_cell["player"]["position"],
                 "team": auto_cell["player"]["team"],
                 "player_id": auto_cell["player"]["id"],
+                "round": ((cell["pick"] - 1) // picks_per_round) + 1,
+                "pick_in_round": ((cell["pick"] - 1) % picks_per_round) + 1
             })
 
     # get user's drafted players
@@ -112,12 +117,18 @@ def draft_player_ajax(request):
     user_players_dict = {p.id: p for p in user_players}
     ordered_user_players = [user_players_dict[pid] for pid in user_roster_ids if pid in user_players_dict]
 
-    # serialize for JSON
-    user_roster_data = [{
-        "name": p.player_name,
-        "position": p.position.abbreviation,
-        "team": p.team.team_name if p.team else "N/A"
-    } for p in ordered_user_players]
+    picks_per_round = len(draft_teams)  # add this line near the top of the function if not already defined
+
+    user_roster_data = []
+    for p in ordered_user_players:
+        round_num, pick_in_round = get_player_pick_info(draft_board, p.id, picks_per_round)
+        user_roster_data.append({
+            "name": p.player_name,
+            "position": p.position.abbreviation,
+            "team": p.team.team_name if p.team else "N/A",
+            "round": round_num,
+            "pick_in_round": pick_in_round,
+        })
 
     # Prepare user roster ordered by position using helper function
     user_roster_ordered = sort_user_roster(user_roster_data, request.session.get("mock_settings", {}))
@@ -127,6 +138,16 @@ def draft_player_ajax(request):
         "updated_cells": updated_cells,
         "user_roster": user_roster_data,
     })
+
+def get_player_pick_info(draft_board, player_id, picks_per_round):
+    for round_idx, round_picks in enumerate(draft_board):
+        for pick_idx, cell in enumerate(round_picks):
+            if cell.get("player") and cell["player"]["id"] == player_id:
+                overall_pick = cell["pick"]  # overall pick number (1-based)
+                round_num = ((overall_pick - 1) // picks_per_round) + 1
+                pick_in_round = ((overall_pick - 1) % picks_per_round) + 1
+                return round_num, pick_in_round
+    return None, None
 
 def get_user_roster_ordered(session, draft_teams, settings):
     try:
