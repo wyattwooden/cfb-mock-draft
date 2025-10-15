@@ -102,10 +102,187 @@
     pointer-events: auto;
 }
 
+
+/* ========== Layout Container ========== */
+.draft-container {
+    overflow-x: auto; /* Allow the entire container to scroll if needed */
+}
+
 /* ========== Column 2: Draft Board ========== */
 .draft-board {
-    flex: 2;
-    min-width: 400px;
+    flex: none; /* Remove flex behavior entirely */
+    width: calc(var(--team-count, 12) * 92px + 20px); /* Fixed width for all teams */
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 10px;
+    max-width: none;
+}
+
+.section-title {
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    flex-shrink: 0; /* Prevent title from shrinking */
+}
+
+/* Draft board grid container */
+.draft-board-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--team-count, 12), 90px);
+    gap: 2px;
+    margin-bottom: 2px;
+    width: calc(var(--team-count, 12) * 92px);
+}
+
+/* Force all grid items to stay in line */
+.draft-header,
+.draft-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Team headers */
+.draft-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 8px 4px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85em;
+    border-radius: 4px 4px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Highlight user's team header */
+.draft-header:has-text("Your Team"),
+.draft-header[data-user-team] {
+    background-color: #e74c3c;
+}
+
+/* Draft cells */
+.draft-cell {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 6px 4px;
+    text-align: center;
+    font-size: 0.8em;
+    line-height: 1.2;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.draft-cell:hover {
+    background-color: #e9ecef;
+}
+
+/* Filled draft cells */
+.draft-cell strong {
+    display: block;
+    font-size: 0.9em;
+    margin-bottom: 2px;
+    color: #2c3e50;
+}
+
+/* Empty pick styling */
+.empty-pick {
+    color: #6c757d;
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+/* Responsive breakpoints - adjust column width but keep fixed size */
+@media (max-width: 1400px) {
+    .draft-board-grid {
+        grid-template-columns: repeat(var(--team-count, 12), 80px);
+        width: calc(var(--team-count, 12) * 82px);
+        min-width: calc(var(--team-count, 12) * 82px);
+    }
+    
+    .draft-cell {
+        font-size: 0.75em;
+        padding: 5px 3px;
+        min-height: 45px;
+    }
+    
+    .draft-header {
+        font-size: 0.8em;
+        padding: 6px 3px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .draft-board-grid {
+        grid-template-columns: repeat(var(--team-count, 12), 70px);
+        width: calc(var(--team-count, 12) * 72px);
+        min-width: calc(var(--team-count, 12) * 72px);
+    }
+    
+    .draft-cell {
+        font-size: 0.7em;
+        padding: 4px 2px;
+        min-height: 40px;
+    }
+    
+    .draft-header {
+        font-size: 0.75em;
+        padding: 5px 2px;
+    }
+}
+
+@media (max-width: 900px) {
+    .draft-board {
+        min-width: 300px;
+    }
+    
+    .draft-board-grid {
+        grid-template-columns: repeat(var(--team-count, 12), 65px);
+        width: calc(var(--team-count, 12) * 67px);
+        min-width: calc(var(--team-count, 12) * 67px);
+    }
+    
+    .draft-cell {
+        font-size: 0.65em;
+        padding: 3px 2px;
+        min-height: 35px;
+    }
+    
+    .draft-header {
+        font-size: 0.7em;
+        padding: 4px 2px;
+    }
+}
+
+@media (max-width: 600px) {
+    .draft-board-grid {
+        grid-template-columns: repeat(var(--team-count, 12), 60px);
+        width: calc(var(--team-count, 12) * 62px);
+        min-width: calc(var(--team-count, 12) * 62px);
+    }
+    
+    .draft-cell {
+        font-size: 0.6em;
+        padding: 2px 1px;
+        min-height: 30px;
+    }
+    
+    .draft-header {
+        font-size: 0.65em;
+        padding: 3px 1px;
+    }
+}
+
+/* For very large screens, set a maximum column width to prevent stretching */
+@media (min-width: 1600px) {
+    .draft-board-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 120px));
+    }
 }
 
 /* ========== Column 3: My Team ========== */
